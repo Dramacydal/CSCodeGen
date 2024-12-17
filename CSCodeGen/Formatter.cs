@@ -6,9 +6,9 @@ namespace CSCodeGen;
 
 public static class Formatter
 {
-    private static List<IFormatter> _formatters = new();
+    private static readonly List<IFormatter> _formatters = new();
     
-    private static readonly Dictionary<Type, string> _explicitTypeNameDict = new()
+    private static readonly Dictionary<Type, string> ExplicitTypeNameDict = new()
     {
         [typeof(string)] = "string",
         [typeof(char)] = "char",
@@ -32,7 +32,7 @@ public static class Formatter
 
     public static string FormatType(TypeInfo t, GenerationContext context, bool ignoreAlias = false)
     {
-        if (t.Type != null && _explicitTypeNameDict.TryGetValue(t.Type, out var val))
+        if (t.Type != null && ExplicitTypeNameDict.TryGetValue(t.Type, out var val))
             return val;
 
         context.RegisterType(t);
@@ -49,7 +49,7 @@ public static class Formatter
             var genericArguments = t.Type.GetGenericArguments();
 
             var typeName = t.Type.Name[..t.Type.Name.IndexOf('`')];
-            typeName += "<" + string.Join(", ", genericArguments.Select(_ => FormatType(_, context))) + ">";
+            typeName += "<" + string.Join(", ", genericArguments.Select(x => FormatType(x, context))) + ">";
 
             return typeName;
         }
@@ -79,7 +79,7 @@ public static class Formatter
 
     public static string FormatValue(object? value, GenerationContext context)
     {
-        return string.Join(" ", FormatValueMultiline(value, context).Select(_ => _.Text));
+        return string.Join(" ", FormatValueMultiline(value, context).Select(l => l.Text));
     }
 
     public static IEnumerable<CodeLine> FormatValueMultiline(object? value, GenerationContext context)
@@ -95,7 +95,7 @@ public static class Formatter
             return [new(rawString.Value)];
 
         if (value.GetType().IsEnum)
-            return [new(FormatType(value.GetType(), context) + "." + value.ToString())];
+            return [new(FormatType(value.GetType(), context) + "." + value)];
 
         if (value is string s)
             return [new(FormatString(s))];
@@ -112,7 +112,7 @@ public static class Formatter
                 MultiLine = true,
             };
 
-            foreach (var elem in value as IList)
+            foreach (var elem in (value as IList)!)
                 gen.AddCollectionInitializer(elem);
 
             return gen.Generate(context.CreateInherited());
@@ -127,13 +127,13 @@ public static class Formatter
             };
 
             var iDict = value as IDictionary;
-            foreach (var key in iDict.Keys)
+            foreach (var key in iDict!.Keys)
                 gen.AddCollectionInitializer(key, iDict[key]);
 
             return gen.Generate(context.CreateInherited());
         }
 
-        return [new(value.ToString())];
+        return [new(value.ToString()!)];
     }
 
     public static void RegisterFormatter(IFormatter formatter) => _formatters.Add(formatter);

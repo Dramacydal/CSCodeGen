@@ -5,7 +5,7 @@ namespace CSCodeGen.Generators;
 public class ArgumentInfo
 {
     public TypeInfo Type { get; set; }
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
     public bool Nullable { get; set; }
     public Optional Default { get; set; } = new();
 

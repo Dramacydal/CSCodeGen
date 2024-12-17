@@ -4,7 +4,7 @@ namespace CSCodeGen.Generators.Body;
 
 public class ClassCallGenerator : MethodBodyGenerator
 {
-    public string MethodName { get; set; }
+    public string MethodName { get; set; } = "";
     
     public List<object> Arguments { get; set; } = new();
 

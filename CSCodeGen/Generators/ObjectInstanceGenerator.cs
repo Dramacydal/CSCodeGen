@@ -6,7 +6,7 @@ public class ObjectInstanceGenerator : IGenerator
 {
     public class PropertyInitializerInfo
     {
-        public string PropertyName { get; set; }
+        public string PropertyName { get; set; } = "";
         public object? Value { get; set; }
     }
 
