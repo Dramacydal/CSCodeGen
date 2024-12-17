@@ -5,12 +5,18 @@ namespace CSCodeGen.Generators;
 public class PropertyGenerator : IGenerator
 {
     public AccessFlags Access { get; set; } = AccessFlags.Public;
+
     public bool Override { get; set; }
+
     public TypeInfo Type { get; set; }
+
     public string Name { get; set; }
+
     public AccessorsFlags Accessors { get; set; } = AccessorsFlags.None;
 
     public Optional Value { get; set; } = new();
+
+    public bool Multiline { get; set; }
 
     public PropertyGenerator SetType(Type t)
     {
@@ -29,7 +35,7 @@ public class PropertyGenerator : IGenerator
         var g = new LineGenerator(context);
 
         var signature = $"{Type.Format(context)} {Name}";
-        
+
         var parts = Access.GenerateParts();
         if (Override)
             parts.Add("override");
@@ -79,12 +85,29 @@ public class PropertyGenerator : IGenerator
             else
                 signature += " = ";
 
-            signature += Formatter.FormatValue(Value.Value, context) + ";";
+            if (!Multiline)
+            {
+                signature += Formatter.FormatValue(Value.Value, context) + ";";
+                g.Create(signature);
+            }
+            else
+            {
+                var lines = Formatter.FormatValueMultiline(Value.Value, context).ToList();
+
+                lines[0].Text = signature + lines[0].Text;
+                lines[^1].Text += ";";
+                
+                g.Create(signature + lines[0].Text);
+                g.AddRange(lines.Skip(1), true);
+            }
         }
         else if (setterParts.Count == 0)
+        {
             signature += ";";
-
-        g.Create(signature);
+            g.Create(signature);
+        }
+        else
+            g.Create(signature);
 
         return g.Lines;
     }

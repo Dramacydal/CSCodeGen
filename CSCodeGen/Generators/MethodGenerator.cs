@@ -1,5 +1,4 @@
-﻿using CSCodeGen.Generators.Body;
-using CSCodeGen.Structures;
+﻿using CSCodeGen.Structures;
 
 namespace CSCodeGen.Generators;
 
@@ -84,7 +83,7 @@ public class MethodGenerator
         g.Create("{");
         ++context.IndentLevel;
         foreach (var asd in BodyItems)
-            g.Lines.AddRange(asd.Generate(context));
+            g.AddRange(asd.Generate(context));
         --context.IndentLevel;
         g.Create("}");
 

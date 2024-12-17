@@ -54,7 +54,7 @@ public class ClassGenerator : IGenerator
         ++context.IndentLevel;
         foreach (var p in Properties)
         {
-            g.Lines.AddRange(p.Generate(context));
+            g.AddRange(p.Generate(context));
             g.CreateEmpty();
         }
 
@@ -63,14 +63,12 @@ public class ClassGenerator : IGenerator
         ++context.IndentLevel;
         foreach (var m in Methods)
         {
-            g.Lines.AddRange(m.Generate(context));
+            g.AddRange(m.Generate(context));
             g.CreateEmpty();
         }
-
         --context.IndentLevel;
 
         g.Create("}");
-
 
         return g.Lines;
     }

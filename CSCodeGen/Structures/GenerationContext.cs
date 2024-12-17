@@ -4,13 +4,14 @@ public class GenerationContext
 {
     public int IndentLevel { get; set; } = 0;
     public string Namespace { get; set; }
+    
     private List<KeyValuePair<TypeInfo, string>> _registeredTypes = new();
 
     public List<string> BuildUsings()
     {
         var list = _registeredTypes.Where(p => string.IsNullOrEmpty(p.Value));
 
-        return list.Select(p => p.Key.Namespace).Distinct().ToList();
+        return list.Select(p => p.Key.Namespace).Distinct().Order().ToList();
     }
 
     public List<KeyValuePair<string, string>> BuildAliases()
@@ -21,7 +22,7 @@ public class GenerationContext
             new KeyValuePair<string, string>($"{p.Key.Namespace}.{p.Key.Name}", p.Value)).ToList();
     }
 
-    public CodeLine CreateLine(string text = "") => new CodeLine() { Text = text, IndentLevel = IndentLevel };
+    public CodeLine CreateLine(string text = "") => new(text, IndentLevel);
 
     public void RegisterType(Type t, string alias = "") => RegisterType(new TypeInfo(t), alias);
 
@@ -48,5 +49,21 @@ public class GenerationContext
         var info = _registeredTypes.FirstOrDefault(_ => _.Key.Name == type.Name);
 
         return info.Key != null ? info.Value : "";
+    }
+
+    public DisposableContext TemporaryIndent(int indent = 0)
+    {
+        var oldIndent = IndentLevel;
+        return new DisposableContext(() => IndentLevel = indent, () => IndentLevel = oldIndent);
+    }
+
+    public GenerationContext CreateInherited(int indentLevel = 0)
+    {
+        return new GenerationContext()
+        {
+            IndentLevel = indentLevel,
+            Namespace = Namespace,
+            _registeredTypes = _registeredTypes
+        };
     }
 }
