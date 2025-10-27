@@ -97,7 +97,7 @@ public class PropertyGenerator : IGenerator
                 lines[0].Text = signature + lines[0].Text;
                 lines[^1].Text += ";";
                 
-                g.Create(signature + lines[0].Text);
+                g.Create(lines[0].Text);
                 g.AddRange(lines.Skip(1), true);
             }
         }

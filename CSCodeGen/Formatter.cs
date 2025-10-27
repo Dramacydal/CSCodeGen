@@ -102,21 +102,11 @@ public static class Formatter
 
         if (value is bool b)
             return [new(b ? "true" : "false")];
+        
+        if (value is float or double or decimal)
+            return [new(value.ToString().Replace(",", "."))];
 
         var valueType = value.GetType();
-        if (typeof(IList).IsAssignableFrom(valueType))
-        {
-            var gen = new ObjectInstanceGenerator()
-            {
-                Type = valueType,
-                MultiLine = true,
-            };
-
-            foreach (var elem in (value as IList)!)
-                gen.AddCollectionInitializer(elem);
-
-            return gen.Generate(context.CreateInherited());
-        }
 
         if (typeof(IDictionary).IsAssignableFrom(valueType))
         {
@@ -129,6 +119,20 @@ public static class Formatter
             var iDict = value as IDictionary;
             foreach (var key in iDict!.Keys)
                 gen.AddCollectionInitializer(key, iDict[key]);
+
+            return gen.Generate(context.CreateInherited());
+        }
+        
+        if (typeof(IEnumerable).IsAssignableFrom(valueType))
+        {
+            var gen = new ObjectInstanceGenerator()
+            {
+                Type = valueType,
+                MultiLine = true,
+            };
+
+            foreach (var elem in (value as IEnumerable)!)
+                gen.AddCollectionInitializer(elem);
 
             return gen.Generate(context.CreateInherited());
         }

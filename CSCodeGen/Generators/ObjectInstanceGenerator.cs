@@ -27,6 +27,8 @@ public class ObjectInstanceGenerator : IGenerator
         var str = $"new {Formatter.FormatType(Type, context)}";
         if (ContructorArgs.Count > 0)
             str += "(" + string.Join(", ", ContructorArgs.Select(_ => Formatter.FormatValue(_, context))) + ")";
+        else
+            str += "()";
 
         g.Create(str);
 
